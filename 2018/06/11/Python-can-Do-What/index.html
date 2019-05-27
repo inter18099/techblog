@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Python唯一的缺点就是速度没有编译类和低级的C, C++快。简单地说，Python的标准实现将源代码编译成中间格式，这种格式叫字节码（byte code），然后运行时去解释字节码。字节码是可移植的，因为它是独立于平台的格式。然而，因为Python不会被编译成机器码，一些程序将会比C等语言运行地更慢。你是否关心执行速度取决于你写的是什么类型的程序。Python已经被优化地很好，Python代码在">
+<meta name="keywords" content="泛泛而谈">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python能用来做什么">
+<meta property="og:url" content="http://blog.xiaozhangzaici.com/2018/06/11/Python-can-Do-What/index.html">
+<meta property="og:site_name" content="walking on the code">
+<meta property="og:description" content="Python唯一的缺点就是速度没有编译类和低级的C, C++快。简单地说，Python的标准实现将源代码编译成中间格式，这种格式叫字节码（byte code），然后运行时去解释字节码。字节码是可移植的，因为它是独立于平台的格式。然而，因为Python不会被编译成机器码，一些程序将会比C等语言运行地更慢。你是否关心执行速度取决于你写的是什么类型的程序。Python已经被优化地很好，Python代码在">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-06-11T07:52:11.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python能用来做什么">
+<meta name="twitter:description" content="Python唯一的缺点就是速度没有编译类和低级的C, C++快。简单地说，Python的标准实现将源代码编译成中间格式，这种格式叫字节码（byte code），然后运行时去解释字节码。字节码是可移植的，因为它是独立于平台的格式。然而，因为Python不会被编译成机器码，一些程序将会比C等语言运行地更慢。你是否关心执行速度取决于你写的是什么类型的程序。Python已经被优化地很好，Python代码在">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://blog.xiaozhangzaici.com/2018/06/11/Python-can-Do-What/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Python能用来做什么 | walking on the code</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">walking on the code</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">I like it</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.xiaozhangzaici.com/2018/06/11/Python-can-Do-What/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xiao Zhang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="walking on the code">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Python能用来做什么
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-06-11 15:52:11" itemprop="dateCreated datePublished" datetime="2018-06-11T15:52:11+08:00">2018-06-11</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Python唯一的缺点就是速度没有编译类和低级的C, C++快。<br>简单地说，Python的标准实现将源代码编译成中间格式，这种格式叫字节码（byte code），然后运行时去解释字节码。字节码是可移植的，因为它是独立于平台的格式。然而，因为Python不会被编译成机器码，一些程序将会比C等语言运行地更慢。<br>你是否关心执行速度取决于你写的是什么类型的程序。Python已经被优化地很好，Python代码在一些领域运行地很快。更进一步说，当你在Python脚本中做一些真实的工作，例如处理一个文件或建造一个图形化用户界面，你的程序将以C的速度运行，因为这样的任务会直接分派给Python解释器中的已编译的C代码。从根本上说，你从Python的快速开发中的获益要大于执行速度的损失，尤其是在现代计算机的速度下更是如此。<br>但是，即使是现代计算机的速度下，也有一些任务是要求很高的执行速度的，例如数值计算和动画。这些要求代码以C的速度运行。即使这样，你仍然可用Python来开发，只不过你需要将程序分割开，需要高速运行的部分用C来开发，然后用Python脚本将它们联系到一起。</p>
+<h3 id="谁在用Python"><a href="#谁在用Python" class="headerlink" title="谁在用Python"></a>谁在用Python</h3><p>Google在它的web搜索系统里广泛使用Python。<br>Youtube的分享服务基本上是由Python写的。<br>Dropbox存储服务代码，无论是它的服务端和桌面客户端软件，基本上是由Python写的。<br>EVE Online，一个大型多人在线游戏，广泛使用Python<br>广泛使用的BitTorrent点对点文件分享服务项目是由一个Python程序创建的。<br>工业光魔（Industrial Light &amp; Magic）和皮克斯（Pixar）等使用Python生产动画电影。<br>ESRI使用Python作为它的受欢迎的GIS地图产品的终端自定义工具<br>Google的App Engine的web开发框架使用Python作为开发语言。<br>NSA使用Python来做公开密钥加密和智能分析<br>iRobot使用Python来开发商业和军事机器人装置。<br>文明4游戏的自定义脚本化事件完全由Python实现。<br>一童一电脑（One Laptop Per Child）项目用Python构建它的用户界面和活动模型。<br>Netflix和Yelp都已把Python在其软件基础设施中的地位写入文档。<br>Intel，思科，Hewlett-Packard，Seagate，Qualcomm和IBM使用Python做硬件测试。<br>摩根大通（JPMorgan Chase）、瑞银集团（UBS）、Getco、Citadel将Python用做金融市场预测。<br>NASA、洛斯阿拉莫斯国家实验室（Los Alamos）、费米国立加速器实验室（Fermilab），喷气推进实验室（JPL）等等使用Python做科学计算任务。</p>
+<h3 id="Python能用来做什么"><a href="#Python能用来做什么" class="headerlink" title="Python能用来做什么"></a>Python能用来做什么</h3><p>作为一个通用用途的语言，Python可用作从网站开发到机器人和航天器控制。具体来说，有几个领域，如系统编程、图形化界面、Internet脚本、组件集成、数据库编程、数值和科学计算、游戏、图像、数据挖掘、机器人、Excel。</p>
+<h4 id="系统编程"><a href="#系统编程" class="headerlink" title="系统编程"></a>系统编程</h4><p>Python的内置操作系统服务的接口使得它适合作为可移植的、可维护的系统管理工具（有时被称为shell工具）。Python程序可以搜索文件和目录树、启动其他程序、做通过处理器和线程做并行计算等等。<br>Python的标准库绑定了可移植操作系统接口（POSIX），并且支持所有常见的操作系统工具：环境变量、文件、sockets、pips、processes、多线程、正则表达式模式匹配、命令行参数、标准流式接口（standard stream interfaces）、shell命令启动器、文件名expandsion、zip file工具、XML和JSON语法分析器、CSV文件处理器等等。   Python的系统接口被设计为可移植的，举个例子，一个复制目录树的脚本可以不加修改在任何主要Python平台上运行。</p>
+<h4 id="图形化界面"><a href="#图形化界面" class="headerlink" title="图形化界面"></a>图形化界面</h4><p>Python的简单性使得它适合用来做桌面端的图形化界面。Python内置被称作tkinter的Tk图形化界面接口。tkinter使得Python程序可以实现可移植的图形化界面。Python/tkinter无差别运行在微软Windows、X Windows（在Unix和Linux上）和Mac OS上。一种免费扩展包，PMW扩展了tkinter的工具集。基于C++库的wxPython图形化界面接口提供了另一种实现可移植图形化界面的方式。<br>高级工具集例如Dabo的底层基于wxPython和tkinter。使用适当的库，你可以使用其他工具集来实现Python图形化界面。例如：使用Qt的PyQt、使用GTK的PyGTK、使用MFC的PyWin32、使用.NET的IronPython、使用Jython或JPype的Swing。</p>
+<h4 id="Internet脚本"><a href="#Internet脚本" class="headerlink" title="Internet脚本"></a>Internet脚本</h4><p>Python的标准Internet模块使Python程序可应用在多方面的网络任务上。脚本可以使用sockets通信，从表单提取数据送到服务端的CGI脚本，通过FTP传送文件、语法解析和生成XML和JSON文档、发送、接收、组合、语法解析email、通过URL获取网页、语法解析获取到的HTML、通过XML-RPC、SOAP、Telnet通信等等。Python的库使得这些任务惊人的简单。<br>在网上有一大堆第三方工具可做Python的Internet编程。举例来说，HTMLGen由Python类的描述生成HTML文件，mod_python包在Apache web服务器上高效地运行Python，Jython系统提供Python/Java无缝整合，而且支持服务端applet运行在客户端。<br>现在有很多成熟的web开发框架，如Django、TurboGear、web2py、Pylons、Zope和WebWare，这些框架支持用Python构建多特性的、高质量的网站。这些框架包含一些如下特性：对象关系映射、MVC架构、服务端脚本编程、模版、AJAX支持，这些特性用来提供完备的企业级web开发解决方案。</p>
+<h4 id="组件集成"><a href="#组件集成" class="headerlink" title="组件集成"></a>组件集成</h4><p>Python可以被C/C++系统扩展和集成，这使得Python作为灵活的胶水语言在为其他系统和组件编写脚本方面大有可为。举例来说，集成C语言库到Python允许Python测试和启动库的组件，并且在产品中嵌入Python允许现场编写定制代码，这种定制并不需要重新编译整个项目。<br>类似SWIG和SIP代码产生器的工具能自动化大部分连接Python中的被编译组件的工作。Cython系统允许程序员混合Python和类C代码。更大点的框架，类似Python的Windows支持的COM、基于Java的Jython、基于.NET的IronPython提供另外可选的方式为组件编写脚本。举例来说，在windows上，Python脚本可以用框架去为Word和Excel编写脚本，访问Silverlight等等。</p>
+<h4 id="数据库编程"><a href="#数据库编程" class="headerlink" title="数据库编程"></a>数据库编程</h4><p>对于传统数据库的要求，有Python对所有常用的关系型数据库系统的接口—Sybase、Oracle、Informix、ODBC、PostgreSQL、SQLite等等。Python也定义了一个可移植的接口，利用这个接口可以编写独立于底层数据库的代码，不论底层数据库是什么，存取数据库数据只用一套代码即可。例如，如果你实现了这个可移植的接口，那么为Mysql编写的代码就可能大部分不做更改地运行在其他系统如Oracle上。 Python本身从2.5就含有SQLite，支持原型和基本的程序存储需求。<br>在非SQL方面，Python有pickle模块提供简单的对象持久化系统，它允许Python简单存取Python对象到文件。在Web方面，有第三方开源系统，如ZODB和Durus为Python脚本提供完全的面向对象数据库系统。其他的如SQLObject和SQLAlchemy实现了对象关系映射（ORM），而ORM是指将Python类模型和数据库表对应起来。Pymongo是MongoDb的一个接口，它以接近于Python的lists和dictonaries的方式存储数据，它的文本会被Python的标准库json模块语法解析和创建。<br>其他系统仍会提供更多的方法存储数据，包括谷歌的App Engine的datastore，还有其他使用云存储方式，如Azure、PiCloud、OpenStack和Stackato。</p>
+<h4 id="值和科学计算"><a href="#值和科学计算" class="headerlink" title="值和科学计算"></a>值和科学计算</h4><p>数值计算领域也重度使用Python。这是一个传统来讲不属于脚本语言的领域，但现在发展成Python最吸引人的用户案例。NumPy是Python的高性能数值计算扩展，其中包括对数学库的接口等。<br>Python的另一些数值的工具支持动画、3D可视化、并行处理等。流行的Scipy和ScientificPython扩展提供了一些科学计算工具库，并且使用NumPy作为核心组件。Python的PyPy实现在科学计算领域也获得了关注，一部分原因是因为其排序算法会运行地10倍到100倍快速。</p>
+<h4 id="更多：游戏，图像，数据挖掘，机器人，Excel…"><a href="#更多：游戏，图像，数据挖掘，机器人，Excel…" class="headerlink" title="更多：游戏，图像，数据挖掘，机器人，Excel…"></a>更多：游戏，图像，数据挖掘，机器人，Excel…</h4><p>更多的使用Python的领域见以下。你会发现这些工具允许你用Python做：<br>游戏编程和多媒体，使用pygame、cgkit、pyglet、pysoy、panda3D等。<br>串口通信，使用PySerial扩展。<br>图像处理，使用PIL和更新的分支Pillow、PyOpenGL、Bender、Maya等。<br>机器人控制，使用PyRo。<br>自然语言分析，使用NLTK。<br>Excel表格函数和宏编程，使用PyXLL、DataNitro插件。<br>媒体文件内容和元数据标签处理，使用PyMedia、ID3、PIL/Pillow等。<br>人工智能，使用PyBrain神经网络库和Milk机器学习工具集。<br>专业系统编程，使用PyCLIPS、Pyke、Pyrolog、PyDatalog。<br>网络监测，使用zenoss。<br>Python脚本设计和建模，使用PythonCAD、PythonOCC、FreeCAD等。<br>文档处理和生成，使用ReportLab、Sphinx、Cheetah、PyPDF等。<br>用xml库包进行XML语法解析，使用xmlrpclib模块和其他第三方库。<br>JSON和CSV文件处理，使用json、csv模块。<br>数据挖掘，使用Orange框架、Pattern包、Scrapy。</p>
+<p>你甚至可以用PySolFC程序玩纸牌，并且你当然也可以编写Python脚本干一些更偏门一点的事，如处理每天的系统管理，处理你的邮件，管理你的文档和媒体库。你将在PyPI网站找到一些有帮助的链接。</p>
+<p>虽然Python有很广泛的应用范围，但Python在很多应用范围都是作为集成组件的角色。当编译语言例如C的前端使得Python在很多领域都有用处。作为一个支持集成的通用的语言，Python广泛适用于很多领域。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/泛泛而谈/" rel="tag"># 泛泛而谈</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/11/Django-Login-Intercept-Implemented-by-Middleware/" rel="next" title="中间件实现django登录拦截验证">
+                <i class="fa fa-chevron-left"></i> 中间件实现django登录拦截验证
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/12/Testing-and-Debugging-Advices/" rel="prev" title="测试和debug的若干建议">
+                测试和debug的若干建议 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Xiao Zhang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">categories</span>
+                  
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#谁在用Python"><span class="nav-number">1.</span> <span class="nav-text">谁在用Python</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Python能用来做什么"><span class="nav-number">2.</span> <span class="nav-text">Python能用来做什么</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#系统编程"><span class="nav-number">2.1.</span> <span class="nav-text">系统编程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#图形化界面"><span class="nav-number">2.2.</span> <span class="nav-text">图形化界面</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Internet脚本"><span class="nav-number">2.3.</span> <span class="nav-text">Internet脚本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#组件集成"><span class="nav-number">2.4.</span> <span class="nav-text">组件集成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数据库编程"><span class="nav-number">2.5.</span> <span class="nav-text">数据库编程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#值和科学计算"><span class="nav-number">2.6.</span> <span class="nav-text">值和科学计算</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#更多：游戏，图像，数据挖掘，机器人，Excel…"><span class="nav-number">2.7.</span> <span class="nav-text">更多：游戏，图像，数据挖掘，机器人，Excel…</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xiao Zhang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.1.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

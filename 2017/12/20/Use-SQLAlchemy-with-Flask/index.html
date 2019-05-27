@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="注：这是我转的一篇flask配合sqlachemy的文章，网上好多文章都是写flask-sqlachemy，是辅助flask和sqlachemy运行的一个插件，用了它写法就不一样了，我因为走了弯路，找到这篇文章，就记下来。 Flask 是一个 python web micro framework。所谓微框架，主要是 flask 简洁与轻巧，自定义程度高。相比 django 更加轻量级。 之前一直折">
+<meta property="og:type" content="article">
+<meta property="og:title" content="搭配Flask使用SQLAlchemy">
+<meta property="og:url" content="http://blog.xiaozhangzaici.com/2017/12/20/Use-SQLAlchemy-with-Flask/index.html">
+<meta property="og:site_name" content="walking on the code">
+<meta property="og:description" content="注：这是我转的一篇flask配合sqlachemy的文章，网上好多文章都是写flask-sqlachemy，是辅助flask和sqlachemy运行的一个插件，用了它写法就不一样了，我因为走了弯路，找到这篇文章，就记下来。 Flask 是一个 python web micro framework。所谓微框架，主要是 flask 简洁与轻巧，自定义程度高。相比 django 更加轻量级。 之前一直折">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-05-27T00:11:41.585Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="搭配Flask使用SQLAlchemy">
+<meta name="twitter:description" content="注：这是我转的一篇flask配合sqlachemy的文章，网上好多文章都是写flask-sqlachemy，是辅助flask和sqlachemy运行的一个插件，用了它写法就不一样了，我因为走了弯路，找到这篇文章，就记下来。 Flask 是一个 python web micro framework。所谓微框架，主要是 flask 简洁与轻巧，自定义程度高。相比 django 更加轻量级。 之前一直折">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://blog.xiaozhangzaici.com/2017/12/20/Use-SQLAlchemy-with-Flask/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>搭配Flask使用SQLAlchemy | walking on the code</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">walking on the code</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">I like it</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.xiaozhangzaici.com/2017/12/20/Use-SQLAlchemy-with-Flask/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xiao Zhang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="walking on the code">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">搭配Flask使用SQLAlchemy
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2017-12-20 20:57:08" itemprop="dateCreated datePublished" datetime="2017-12-20T20:57:08+08:00">2017-12-20</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-05-27 08:11:41" itemprop="dateModified" datetime="2019-05-27T08:11:41+08:00">2019-05-27</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>注：这是我转的一篇flask配合sqlachemy的文章，网上好多文章都是写flask-sqlachemy，是辅助flask和sqlachemy运行的一个插件，用了它写法就不一样了，我因为走了弯路，找到这篇文章，就记下来。</p>
+<p>Flask 是一个 python web micro framework。所谓微框架，主要是 flask 简洁与轻巧，自定义程度高。相比 django 更加轻量级。</p>
+<p>之前一直折腾 django，得益于django  的 ORM 模式很好用，上手简单，使用方便。Flask里面没有原生的 orm，需要用到第三方的库，大名顶顶的 SQLALchemy正是一类 实现ORM的库。<br>下面简单介绍一下，Flask中如何使用sqlchemy (注意，这个和 flask-sqlalchemy 的使用还是有差别的，至于 flask-sqlalchemy 用法下一篇博客介绍。)。参考官方文档<a href="https://link.jianshu.com?t=http://docs.torriacg.org/docs/flask/patterns/sqlalchemy.html" target="_blank" rel="noopener"> 在 Flask 中使用 SQLAlchemy</a></p>
+<p>一 安装 SQLAlchemy 扩展<br>在 shell 命令下输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install sqlchemy</span><br></pre></td></tr></table></figure>
+<p>检测是否安装成功:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">import sqlchemy</span><br><span class="line">sqlchemy.__version__ # 0.10.1</span><br></pre></td></tr></table></figure>
+<p>如果没有报错，则安装成功</p>
+<p>二 显式调用<br>所谓显示调用，就是免去操作 sqlchemy 和 python class 的映射操作，而是由代码直接完成。关于 sqlchemy的详细使用，再另外一篇博客介绍。移步 sqlchemy的使用教程。<br>新建一个 flask项目。项目结构如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">(env)ghost@ghost-H61M-S2V-B3:~/project/flask/fsqlauto$ tree</span><br><span class="line">.</span><br><span class="line">├── app.py</span><br><span class="line">├── database.py</span><br><span class="line">├── models.py</span><br><span class="line">├── static</span><br><span class="line">└── templates</span><br><span class="line">                                  </span><br><span class="line">2 directories, 3 files</span><br></pre></td></tr></table></figure>
+<p>我们先定义数据库连接,操作 database.py</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line">                                                                </span><br><span class="line">from sqlalchemy import create_engine</span><br><span class="line">from sqlalchemy.orm import scoped_session, sessionmaker</span><br><span class="line">from sqlalchemy.ext.declarative import declarative_base</span><br><span class="line">                                                                </span><br><span class="line">engine = create_engine(&apos;sqlite:///./test.db&apos;, convert_unicode=True) # 创建数据库引擎( 当前目录下保存数据库文件) </span><br><span class="line">db_session = scoped_session(sessionmaker(autocommit=False,</span><br><span class="line">                                         autoflush=False,</span><br><span class="line">                                         bind=engine))</span><br><span class="line">Base = declarative_base()</span><br><span class="line">Base.query = db_session.query_property()</span><br><span class="line">                                                                </span><br><span class="line">def init_db():</span><br><span class="line">    # 在这里导入所有的可能与定义模型有关的模块，这样他们才会合适地</span><br><span class="line">    # 在 metadata 中注册。否则，您将不得不在第一次执行 init_db() 时</span><br><span class="line">    # 先导入他们。</span><br><span class="line">    import models</span><br><span class="line">    Base.metadata.create_all(bind=engine)</span><br></pre></td></tr></table></figure>
+<p>init_db 方法创建数据库<br>然后定义我们的 models.py</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line">                                                              </span><br><span class="line">from sqlalchemy import Column, Integer, String</span><br><span class="line">from database import Base</span><br><span class="line">                                                              </span><br><span class="line">class User(Base):</span><br><span class="line">    __tablename__ = &apos;users&apos;</span><br><span class="line">                                                              </span><br><span class="line">    id = Column(Integer, primary_key=True)</span><br><span class="line">    name = Column(String(50), unique=True)</span><br><span class="line">    email = Column(String(120), unique=True)</span><br><span class="line">                                                              </span><br><span class="line">    def __init__(self, name=None, email=None):</span><br><span class="line">        self.name = name</span><br><span class="line">        self.email = email</span><br><span class="line">                                                              </span><br><span class="line">    def __repr__(self):</span><br><span class="line">        return &apos;%s (%r, %r)&apos; % (self.__class__.__name__, self.name, self.email)</span><br></pre></td></tr></table></figure>
+<p>定义了一个 python class ,实际上是映射了 users 表里.<br>最后就是我们的应用程序主入口</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line">                                                            </span><br><span class="line">from flask import Flask</span><br><span class="line">from database import init_db, db_session</span><br><span class="line">from models import User</span><br><span class="line">                                                            </span><br><span class="line">app = Flask(__name__)</span><br><span class="line">                                                            </span><br><span class="line">@app.teardown_request</span><br><span class="line">def shutdown_session(exception=None):</span><br><span class="line">    db_session.remove()</span><br><span class="line">                                                            </span><br><span class="line">                                                            </span><br><span class="line">@app.route(&apos;/&apos;)</span><br><span class="line">def index():</span><br><span class="line">    return &apos;hello world flask&apos;</span><br><span class="line">                                                            </span><br><span class="line">@app.route(&apos;/add/&lt;name&gt;/&lt;email&gt;&apos;)</span><br><span class="line">def add(name, email):</span><br><span class="line">    u = User(name=name, email=email)</span><br><span class="line">    try:</span><br><span class="line">        db_session.add(u)</span><br><span class="line">        db_session.commit()</span><br><span class="line">    except Exception, e:</span><br><span class="line">        return &apos;wrong&apos;</span><br><span class="line">    return &apos;Add %s user successfully&apos; % name</span><br><span class="line">                                                            </span><br><span class="line">@app.route(&apos;/get/&lt;name&gt;&apos;)</span><br><span class="line">def get(name):</span><br><span class="line">    try:</span><br><span class="line">        u = User.query.filter(User.name==name).first()</span><br><span class="line">    except Exception, e:</span><br><span class="line">        return &apos;there isnot %s&apos; % name</span><br><span class="line">    return &apos;hello %s&apos; % u.name</span><br><span class="line">                                                            </span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    init_db()</span><br><span class="line">    app.debug = True</span><br><span class="line">    app.run()</span><br></pre></td></tr></table></figure>
+<p>需要注意,定义了一个 @app.teardown_request 装饰器.用查询完毕后关闭数据库,具体可以参考flask文档 数据库.<br>这里的主方法中 init_db 主要是初始化数据库,如果数据库存在就链接读取.<br>add 是数据库添加记录方法, get 正好是数据库查询,更多例子请参考 sqlchemy教程</p>
+<p>三 手动实现 ORM<br>上面是自动实现 orm,如果是手动,相应的文件修改如下:<br>database.py</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line">                           </span><br><span class="line">from sqlalchemy import create_engine, MetaData</span><br><span class="line">from sqlalchemy.orm import scoped_session, sessionmaker</span><br><span class="line">                           </span><br><span class="line">                           </span><br><span class="line">engine = create_engine(&apos;sqlite:///./test.db&apos;, convert_unicode=True)</span><br><span class="line">metadata = MetaData()</span><br><span class="line">db_session = scoped_session(sessionmaker(autocommit=False,</span><br><span class="line">                                        autoflush=False,</span><br><span class="line">                                        bind=engine))</span><br><span class="line">                           </span><br><span class="line">                           </span><br><span class="line">def init_db():</span><br><span class="line">    metadata.create_all(bind=engine)</span><br></pre></td></tr></table></figure>
+<p>models.py</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">from sqlalchemy import Table, Column, Integer, String</span><br><span class="line">from sqlalchemy.orm import mapper</span><br><span class="line">from database import metadata, db_session</span><br><span class="line">                          </span><br><span class="line">class User(object):</span><br><span class="line">                          </span><br><span class="line">    query = db_session.query_property()</span><br><span class="line">                          </span><br><span class="line">    def __init__(self, name=None, email=None):</span><br><span class="line">        self.name = name</span><br><span class="line">        self.email = email</span><br><span class="line">                          </span><br><span class="line">    def __repr__(self):</span><br><span class="line">        return &apos;&lt;User %s&gt;&apos; % (self.name)</span><br><span class="line">                          </span><br><span class="line">users = Table(&apos;users&apos;, metadata,</span><br><span class="line">    Column(&apos;id&apos;, Integer, primary_key=True),</span><br><span class="line">    Column(&apos;name&apos;, String(50), unique=True),</span><br><span class="line">    Column(&apos;email&apos;, String(120), unique=True)</span><br><span class="line">)</span><br><span class="line">                          </span><br><span class="line">mapper(User, users)</span><br></pre></td></tr></table></figure>
+<p>model 需要手动定义 table 并指定映射<br>app.py</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line">                    </span><br><span class="line">import sqlite3</span><br><span class="line">from flask import Flask</span><br><span class="line">from database import *</span><br><span class="line">from models import *</span><br><span class="line">                    </span><br><span class="line">app = Flask(__name__)</span><br><span class="line">                    </span><br><span class="line">                    </span><br><span class="line">@app.teardown_request</span><br><span class="line">def teardown_request(exception=None):</span><br><span class="line">    db_session.remove()</span><br><span class="line">                    </span><br><span class="line">@app.route(&apos;/&apos;)</span><br><span class="line">def index():</span><br><span class="line">    return &apos;hello&apos;</span><br><span class="line">                    </span><br><span class="line">@app.route(&apos;/add/&lt;name&gt;/&lt;email&gt;&apos;)</span><br><span class="line">def add(name, email):</span><br><span class="line">    u = User(name, email)</span><br><span class="line">    try:</span><br><span class="line">        db_session.add(u)    </span><br><span class="line">        db_session.commit()  </span><br><span class="line">    except Exception, e:</span><br><span class="line">        return &apos;wrong&apos;</span><br><span class="line">                          </span><br><span class="line">    return &apos;%s add successful&apos; % name</span><br><span class="line">                    </span><br><span class="line">@app.route(&apos;/get/&lt;name&gt;&apos;)</span><br><span class="line">def get(name):</span><br><span class="line">    try:</span><br><span class="line">        u = User.query.filter(User.name==name).first()</span><br><span class="line">    except Exception, e:</span><br><span class="line">        return &apos;there isnot %s&apos; % name</span><br><span class="line">    return &apos;hello %s&apos; % u.name</span><br><span class="line">                                                   </span><br><span class="line">                    </span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    init_db()</span><br><span class="line">    app.debug = True</span><br><span class="line">    app.run()</span><br></pre></td></tr></table></figure>
+<p>更底层的操作就是 在 flask app 里面写 sql 查询，具体和 sqlalchemy 使用方法一致</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/20/Configure-SQLAlchemy-with-Flask/" rel="next" title="配置Flask和SQLAlchemy">
+                <i class="fa fa-chevron-left"></i> 配置Flask和SQLAlchemy
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/21/Install-Python-on_Ubuntu/" rel="prev" title="在ubuntu上安装Python">
+                在ubuntu上安装Python <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <div class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Xiao Zhang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">categories</span>
+                  
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xiao Zhang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.1.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

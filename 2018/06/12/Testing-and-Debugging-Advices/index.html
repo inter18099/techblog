@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="你只能通过测试找出程序的错误，但不能通过测试来证明程序正确。  测试关键是找出一系列输入，被称作 test suite，这些输入很有可能导致程序出错。 黑盒测试黑盒测试就是不看源代码进行测试。设计课程作业的老师为做题目的学生安排测试，这个测试就是黑盒测试。黑盒测试的一个好处就是当代码实现变了时，测试用例不用变，因为黑盒测试是独立于源代码的。 白盒测试( glass-box testing )相比">
+<meta name="keywords" content="测试,debugging">
+<meta property="og:type" content="article">
+<meta property="og:title" content="测试和debug的若干建议">
+<meta property="og:url" content="http://blog.xiaozhangzaici.com/2018/06/12/Testing-and-Debugging-Advices/index.html">
+<meta property="og:site_name" content="walking on the code">
+<meta property="og:description" content="你只能通过测试找出程序的错误，但不能通过测试来证明程序正确。  测试关键是找出一系列输入，被称作 test suite，这些输入很有可能导致程序出错。 黑盒测试黑盒测试就是不看源代码进行测试。设计课程作业的老师为做题目的学生安排测试，这个测试就是黑盒测试。黑盒测试的一个好处就是当代码实现变了时，测试用例不用变，因为黑盒测试是独立于源代码的。 白盒测试( glass-box testing )相比">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-12-09T05:28:51.674Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="测试和debug的若干建议">
+<meta name="twitter:description" content="你只能通过测试找出程序的错误，但不能通过测试来证明程序正确。  测试关键是找出一系列输入，被称作 test suite，这些输入很有可能导致程序出错。 黑盒测试黑盒测试就是不看源代码进行测试。设计课程作业的老师为做题目的学生安排测试，这个测试就是黑盒测试。黑盒测试的一个好处就是当代码实现变了时，测试用例不用变，因为黑盒测试是独立于源代码的。 白盒测试( glass-box testing )相比">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://blog.xiaozhangzaici.com/2018/06/12/Testing-and-Debugging-Advices/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>测试和debug的若干建议 | walking on the code</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">walking on the code</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">I like it</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.xiaozhangzaici.com/2018/06/12/Testing-and-Debugging-Advices/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xiao Zhang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="walking on the code">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">测试和debug的若干建议
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-06-12 14:35:18" itemprop="dateCreated datePublished" datetime="2018-06-12T14:35:18+08:00">2018-06-12</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-12-09 13:28:51" itemprop="dateModified" datetime="2018-12-09T13:28:51+08:00">2018-12-09</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/未分类/" itemprop="url" rel="index"><span itemprop="name">未分类</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>你只能通过测试找出程序的错误，但不能通过测试来证明程序正确。</p>
+</blockquote>
+<p>测试关键是找出一系列输入，被称作 test suite，这些输入很有可能导致程序出错。</p>
+<h3 id="黑盒测试"><a href="#黑盒测试" class="headerlink" title="黑盒测试"></a>黑盒测试</h3><p>黑盒测试就是不看源代码进行测试。<br>设计课程作业的老师为做题目的学生安排测试，这个测试就是黑盒测试。<br>黑盒测试的一个好处就是当代码实现变了时，测试用例不用变，因为黑盒测试是独立于源代码的。</p>
+<h3 id="白盒测试-glass-box-testing"><a href="#白盒测试-glass-box-testing" class="headerlink" title="白盒测试( glass-box testing )"></a>白盒测试( glass-box testing )</h3><p>相比黑盒测试，白盒测试更容易构建。因为黑盒测试是根据规格书写的，但规格书经常很粗糙和不完整，使得构造黑盒测试很难。</p>
+<p>一个鉴别每个输入空间的方法是找到一系列测试用例覆盖程序代码的每个路径。那些覆盖全部路径的测试用例被称作是路径完全的（ path-complete ）。路径完全的测试用例最少要能覆盖源代码的每一行，甚至是每个语句。</p>
+<h3 id="单元测试和集成测试"><a href="#单元测试和集成测试" class="headerlink" title="单元测试和集成测试"></a>单元测试和集成测试</h3><p>测试经常分做单元测试和集成测试。单元测试就是测试相对独立的一小撮代码，集成测试则测试代码的整体表现。集成测试通常更难，因为代码整体表现测试要比独立的各个部分测试更难掌控。</p>
+<p>很多软件公司都有单独的软件质量保证( SQA )小组。他们来保证软件是严格沿着既定目标开发的。在一些公司，开发小组负责单元测试，QA 小组负责集成测试。</p>
+<p>在工业界，测试流程是高度自动化的，测试工程师不用坐在终端前键入输入检查输出。相反，他们使用测试驱动来达到以下目的：<br>建立调用测试程序所需的环境。<br>调用程序，使用先前定义好的或者自动生成的输入为参数进行测试。<br>保存调用结果。<br>判断测试结果是否可接受并生成报告。</p>
+<p>在单元测试中，我们经常也需要建立测试桩。测试桩很有用途，因为它能让我们测试那些依赖还不存在的软件和硬件的代码。这能让程序员并行开发测试系统的各个部分。理想状态下，测试桩应该：<br>1，检测调用者提供的环境和参数是否可用。<br>2，根据规格书修改参数和全局变量<br>3，根据规格书返回值</p>
+<p>自动化测试的一个魅力就是可以很容易地回归测试。在debug时程序员很容易在修补一处代码时导致另一处代码发生错误。无论做了一个多么小的改变，都需要重新运行测试。</p>
+<h3 id="Debugging"><a href="#Debugging" class="headerlink" title="Debugging"></a>Debugging</h3><blockquote>
+<p>Good programmers try to write their programs in such a way that programming mistakes lead to bugs that are both overt and persistent. This is often called defensive programming.</p>
+</blockquote>
+<h4 id="如何debug"><a href="#如何debug" class="headerlink" title="如何debug"></a>如何debug</h4><p>1，从已有的数据（测试结果和程序代码）开始。其中测试结果，应该不仅仅注重于那些暴露出 bug 的测试，还要检查那些看似正常的测试。通常试着理解为什么其中一个测试能通过，而其他的通不过是很有启发性的。</p>
+<p>2，根据已有数据提出一个假想，它可以是“如果我把 x &lt; y 修改为 x&lt;=y，bug 就会消失”，也可以是宽泛的“我的问题是程序因为while循环的结束条件错误而陷入死循环”</p>
+<p>3，设计一个可复现的试验，并运行它。它有可能会驳倒上文的假设。比如，你可以在 while 循环的前后各放一个 print 语句，如果它们总是成对输出，那么 while 循环是死循环这个假设就可以驳倒了。在运行试验前，就要对可能出现的结果进行分析，如果在试验后再做，就可能导致想法被引导到自己希望的方向。</p>
+<p>4，最后，记录下你进行过哪些测试，这是重点。当你花费数个小时来跟踪一个难解的bug时，很容易忘掉自己进行过什么测试。</p>
+<h4 id="设计debug流程"><a href="#设计debug流程" class="headerlink" title="设计debug流程"></a>设计debug流程</h4><p>重点就是对半搜索，比如写一个 50 行的 function，测试结果不是我们想要的。那么就从 25 行开始 debug，放一个 print(x)，输出想要检查的变量。如果改变量的值不对，那么说明 bug 出现在25行之前，那么再在25/2=12行放置 print(x)，如此重复数次直到找到bug为止。</p>
+<h4 id="当你找到-bug-以后你要做什么"><a href="#当你找到-bug-以后你要做什么" class="headerlink" title="当你找到 bug 以后你要做什么"></a>当你找到 bug 以后你要做什么</h4><p>当找到一个代码里的 bug，人们会急着想把这个 bug 修复掉。但最好慢一点。记着，你的目标不是修复某个 bug，而是要构造一个 bug-free 程序。</p>
+<p>在修复一个 bug 之前，要注意这个修复是否会引发别的问题，是否会引入过度的复杂性？</p>
+<p>要随时保证你可以回到起点。在你做出一系列修改之后，你要保证可以回到起始的版本。硬盘空间一般都是够用的，记得存储旧版本的程序。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/测试/" rel="tag"># 测试</a>
+          
+            <a href="/tags/debugging/" rel="tag"># debugging</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/11/Python-can-Do-What/" rel="next" title="Python能用来做什么">
+                <i class="fa fa-chevron-left"></i> Python能用来做什么
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/14/Introduction-to-Algorithm-of-Different-Complexity/" rel="prev" title="不同复杂度的算法简介">
+                不同复杂度的算法简介 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Xiao Zhang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">categories</span>
+                  
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#黑盒测试"><span class="nav-number">1.</span> <span class="nav-text">黑盒测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#白盒测试-glass-box-testing"><span class="nav-number">2.</span> <span class="nav-text">白盒测试( glass-box testing )</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#单元测试和集成测试"><span class="nav-number">3.</span> <span class="nav-text">单元测试和集成测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Debugging"><span class="nav-number">4.</span> <span class="nav-text">Debugging</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#如何debug"><span class="nav-number">4.1.</span> <span class="nav-text">如何debug</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#设计debug流程"><span class="nav-number">4.2.</span> <span class="nav-text">设计debug流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#当你找到-bug-以后你要做什么"><span class="nav-number">4.3.</span> <span class="nav-text">当你找到 bug 以后你要做什么</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xiao Zhang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.1.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

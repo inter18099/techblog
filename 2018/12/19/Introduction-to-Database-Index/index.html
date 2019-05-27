@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.1.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="数据存储DBMS把数据存储到文件中。最常见的存储结构是按行存储，其中文件被分成一个一个“块”(block)。每个块包含一组元组(tuple)。DBMS每次读取都一次读一个整块。  上图中，我们有4个数据库块，每个块有2个元组。 数据文件的类型DBMS把数据存储到文件中。而文件分为2种类型，heap file（堆型文件）和sequential file(序列型文件)。heap file是无序的。se">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据库索引简析">
+<meta property="og:url" content="http://blog.xiaozhangzaici.com/2018/12/19/Introduction-to-Database-Index/index.html">
+<meta property="og:site_name" content="walking on the code">
+<meta property="og:description" content="数据存储DBMS把数据存储到文件中。最常见的存储结构是按行存储，其中文件被分成一个一个“块”(block)。每个块包含一组元组(tuple)。DBMS每次读取都一次读一个整块。  上图中，我们有4个数据库块，每个块有2个元组。 数据文件的类型DBMS把数据存储到文件中。而文件分为2种类型，heap file（堆型文件）和sequential file(序列型文件)。heap file是无序的。se">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://github.com/inter18099/articles/blob/master/img/2018-12-19-数据库索引简介/2018-12-19-数据库索引简介-1.png?raw=true">
+<meta property="og:image" content="https://github.com/inter18099/articles/blob/master/img/2018-12-19-数据库索引简介/2018-12-19-数据库索引简介-2.png?raw=true">
+<meta property="og:image" content="https://github.com/inter18099/articles/blob/master/img/2018-12-19-数据库索引简介/2018-12-19-数据库索引简介-3.png?raw=true">
+<meta property="og:image" content="https://github.com/inter18099/articles/blob/master/img/2018-12-19-数据库索引简介/2018-12-19-数据库索引简介-4.png?raw=true">
+<meta property="og:image" content="https://github.com/inter18099/articles/blob/master/img/2018-12-19-数据库索引简介/2018-12-19-数据库索引简介-5.png?raw=true">
+<meta property="og:image" content="https://github.com/inter18099/articles/blob/master/img/2018-12-19-数据库索引简介/2018-12-19-数据库索引简介-6.png?raw=true">
+<meta property="og:updated_time" content="2019-05-27T00:07:32.304Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="数据库索引简析">
+<meta name="twitter:description" content="数据存储DBMS把数据存储到文件中。最常见的存储结构是按行存储，其中文件被分成一个一个“块”(block)。每个块包含一组元组(tuple)。DBMS每次读取都一次读一个整块。  上图中，我们有4个数据库块，每个块有2个元组。 数据文件的类型DBMS把数据存储到文件中。而文件分为2种类型，heap file（堆型文件）和sequential file(序列型文件)。heap file是无序的。se">
+<meta name="twitter:image" content="https://github.com/inter18099/articles/blob/master/img/2018-12-19-数据库索引简介/2018-12-19-数据库索引简介-1.png?raw=true">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://blog.xiaozhangzaici.com/2018/12/19/Introduction-to-Database-Index/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>数据库索引简析 | walking on the code</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">walking on the code</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">I like it</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.xiaozhangzaici.com/2018/12/19/Introduction-to-Database-Index/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xiao Zhang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="walking on the code">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">数据库索引简析
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-12-19 07:55:04" itemprop="dateCreated datePublished" datetime="2018-12-19T07:55:04+08:00">2018-12-19</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-05-27 08:07:32" itemprop="dateModified" datetime="2019-05-27T08:07:32+08:00">2019-05-27</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="数据存储"><a href="#数据存储" class="headerlink" title="数据存储"></a>数据存储</h3><p>DBMS把数据存储到文件中。最常见的存储结构是按行存储，其中文件被分成一个一个“块”(block)。每个块包含一组元组(tuple)。DBMS每次读取都一次读一个整块。</p>
+<p><img src="https://github.com/inter18099/articles/blob/master/img/2018-12-19-数据库索引简介/2018-12-19-数据库索引简介-1.png?raw=true" alt="数据库块结构" title="数据库块结构"></p>
+<p>上图中，我们有4个数据库块，每个块有2个元组。</p>
+<h3 id="数据文件的类型"><a href="#数据文件的类型" class="headerlink" title="数据文件的类型"></a>数据文件的类型</h3><p>DBMS把数据存储到文件中。而文件分为2种类型，heap file（堆型文件）和sequential file(序列型文件)。heap file是无序的。sequential file是有序的，它根据一些被称作key的属性排序。（注意这里key跟primary key不是一个概念）。</p>
+<h3 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h3><p>索引(index)是除数据文件之外，一种额外的文件。在给出一个搜索词之后，它能使你快速访问数据文件中的记录。</p>
+<p>索引包含键值对：键(key)是一个属性值（如studentID or name）；值(value)是指向记录的指针。</p>
+<p>一个表可以有多个索引。</p>
+<p>这里,key（键），代表搜索词。</p>
+<p><img src="https://github.com/inter18099/articles/blob/master/img/2018-12-19-数据库索引简介/2018-12-19-数据库索引简介-2.png?raw=true" alt="索引例子" title="索引例子"></p>
+<p><img src="https://github.com/inter18099/articles/blob/master/img/2018-12-19-数据库索引简介/2018-12-19-数据库索引简介-3.png?raw=true" alt="索引例子" title="索引例子"></p>
+<h3 id="索引组织"><a href="#索引组织" class="headerlink" title="索引组织"></a>索引组织</h3><p>有几种不同的索引组织方式：</p>
+<p>1， B+ trees（最流行）。他们是搜索树。</p>
+<p>2， Hash table</p>
+<p>3， 专门的索引(specialized indexes): bit maps, R-trees, inverted index</p>
+<p>B+ trees 索引<br><img src="https://github.com/inter18099/articles/blob/master/img/2018-12-19-数据库索引简介/2018-12-19-数据库索引简介-4.png?raw=true" alt="B+ trees 索引" title="B+ trees 索引"></p>
+<p>Hash table 索引<br><img src="https://github.com/inter18099/articles/blob/master/img/2018-12-19-数据库索引简介/2018-12-19-数据库索引简介-5.png?raw=true" alt="Hash table 索引" title="Hash table 索引"></p>
+<h3 id="聚集索引和非聚集索引"><a href="#聚集索引和非聚集索引" class="headerlink" title="聚集索引和非聚集索引"></a>聚集索引和非聚集索引</h3><p><img src="https://github.com/inter18099/articles/blob/master/img/2018-12-19-数据库索引简介/2018-12-19-数据库索引简介-6.png?raw=true" alt="聚集索引和非聚集索引" title="聚集索引和非聚集索引"></p>
+<h4 id="对比"><a href="#对比" class="headerlink" title="对比"></a>对比</h4><p>聚集索引和非聚集索引：</p>
+<p>聚集索引：那些离得近的索引的记录，它们的数据离得也近。</p>
+<p>非聚集索引：那些离得近的索引的记录，它们的数据也可能离得远。</p>
+<h3 id="查找数据文件"><a href="#查找数据文件" class="headerlink" title="查找数据文件"></a>查找数据文件</h3><p>由于硬盘是一种物理设备，它的速度取决于硬盘旋转的速度，所以顺序访问比随机访问速度要快很多。</p>
+<ul>
+<li><p>快的访问：读取块 1, 2, 3, 4, 5,…</p>
+</li>
+<li><p>慢的访问：读取块 2342, 11, 321, 9, …</p>
+</li>
+</ul>
+<p>定律：随机访问1-2%的数据文件等于顺序访问整个文件的速度。</p>
+<h3 id="选择索引"><a href="#选择索引" class="headerlink" title="选择索引"></a>选择索引</h3><p>索引选择问题是对于一个数据查询很重的应用，你要决定创建哪些索引，不创建哪些索引。这可由数据库管理员(DBA)决定，或者由半自动化工具生成。</p>
+<h4 id="决定搜索词"><a href="#决定搜索词" class="headerlink" title="决定搜索词"></a>决定搜索词</h4><p>让一些属性成为搜索词，如果WHERE子句包含：</p>
+<ul>
+<li>一个精确的匹配</li>
+<li>一个范围匹配</li>
+<li>一个join on 对应属性</li>
+</ul>
+<h4 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h4><p>数据schema： V(M, N, P);<br>索引： INDEX I1 on V(M)</p>
+<p>1，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">SELECT *</span><br><span class="line">FROM V</span><br><span class="line">WHERE V.M = 33</span><br><span class="line"></span><br><span class="line">//不走索引的查询：</span><br><span class="line">查找 V</span><br><span class="line">对于每个记录：</span><br><span class="line">  如果M=33，则输出</span><br><span class="line"></span><br><span class="line">//走索引的查询</span><br><span class="line">在索引I1中寻找key=33</span><br><span class="line">对于每个记录，输出</span><br></pre></td></tr></table></figure>
+<p>2，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">SELECT *</span><br><span class="line">FROM V</span><br><span class="line">WHERE V.M = 33 and V.P = 55</span><br><span class="line"></span><br><span class="line">//不走索引的查询：</span><br><span class="line">搜索V</span><br><span class="line">对于每个记录</span><br><span class="line">如果M=33且P=55，则输出</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">//走索引的查询</span><br><span class="line">在索引I1中寻找key=33</span><br><span class="line">对于每个记录，如果P=55</span><br><span class="line">  则输出</span><br></pre></td></tr></table></figure>
+<h4 id="选择索引的原则"><a href="#选择索引的原则" class="headerlink" title="选择索引的原则"></a>选择索引的原则</h4><p>1， 考虑缩短那些工作量大的频繁的查询的时间。</p>
+<p>2， Consider relations accessed by query – No point indexing other relations</p>
+<p>3， 查看WHERE子句，找可能的search key。</p>
+<p>4， 试着找那些能提高多个查询速度的索引。</p>
+<h4 id="是否使用聚集"><a href="#是否使用聚集" class="headerlink" title="是否使用聚集"></a>是否使用聚集</h4><p>范围查询从聚集(clustering)索引上得到好处最多。</p>
+<p>Covering indexes 不需要聚集，它和非聚集的效果是一样的。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/12/09/Introduction-to-Docker/" rel="next" title="Docker技术简析">
+                <i class="fa fa-chevron-left"></i> Docker技术简析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/12/19/Introduction-to-Database-Transanction/" rel="prev" title="数据库事务简析">
+                数据库事务简析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Xiao Zhang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">categories</span>
+                  
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#数据存储"><span class="nav-number">1.</span> <span class="nav-text">数据存储</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据文件的类型"><span class="nav-number">2.</span> <span class="nav-text">数据文件的类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#索引"><span class="nav-number">3.</span> <span class="nav-text">索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#索引组织"><span class="nav-number">4.</span> <span class="nav-text">索引组织</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#聚集索引和非聚集索引"><span class="nav-number">5.</span> <span class="nav-text">聚集索引和非聚集索引</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#对比"><span class="nav-number">5.1.</span> <span class="nav-text">对比</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查找数据文件"><span class="nav-number">6.</span> <span class="nav-text">查找数据文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#选择索引"><span class="nav-number">7.</span> <span class="nav-text">选择索引</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#决定搜索词"><span class="nav-number">7.1.</span> <span class="nav-text">决定搜索词</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#例子"><span class="nav-number">7.2.</span> <span class="nav-text">例子</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#选择索引的原则"><span class="nav-number">7.3.</span> <span class="nav-text">选择索引的原则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#是否使用聚集"><span class="nav-number">7.4.</span> <span class="nav-text">是否使用聚集</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xiao Zhang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.1.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.1"></script>
+
+  <script src="/js/motion.js?v=7.1.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.1.1"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.1"></script>
+<script src="/js/post-details.js?v=7.1.1"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
